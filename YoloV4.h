@@ -51,7 +51,7 @@ class YOLOV4SHARED_EXPORT CYoloV4: public COcvDnnProcess
 //--------------------------//
 //----- CYoloV4Factory -----//
 //--------------------------//
-class YOLOV4SHARED_EXPORT CYoloV4Factory : public CProcessFactory
+class YOLOV4SHARED_EXPORT CYoloV4Factory : public CTaskFactory
 {
     public:
 
@@ -79,7 +79,7 @@ class YOLOV4SHARED_EXPORT CYoloV4Factory : public CProcessFactory
             m_info.m_keywords = "deep,learning,detection,yolo,darknet";
         }
 
-        virtual ProtocolTaskPtr create(const ProtocolTaskParamPtr& pParam) override
+        virtual WorkflowTaskPtr create(const WorkflowTaskParamPtr& pParam) override
         {
             auto paramPtr = std::dynamic_pointer_cast<CYoloV4Param>(pParam);
             if(paramPtr != nullptr)
@@ -87,7 +87,7 @@ class YOLOV4SHARED_EXPORT CYoloV4Factory : public CProcessFactory
             else
                 return create();
         }
-        virtual ProtocolTaskPtr create() override
+        virtual WorkflowTaskPtr create() override
         {
             auto paramPtr = std::make_shared<CYoloV4Param>();
             assert(paramPtr != nullptr);
@@ -103,7 +103,7 @@ class YOLOV4SHARED_EXPORT CYoloV4Widget: public COcvWidgetDnnCore
     public:
 
         CYoloV4Widget(QWidget *parent = Q_NULLPTR);
-        CYoloV4Widget(ProtocolTaskParamPtr pParam, QWidget *parent = Q_NULLPTR);
+        CYoloV4Widget(WorkflowTaskParamPtr pParam, QWidget *parent = Q_NULLPTR);
 
     private:
 
@@ -131,7 +131,7 @@ class YOLOV4SHARED_EXPORT CYoloV4WidgetFactory : public CWidgetFactory
             m_name = QObject::tr("YoloV4").toStdString();
         }
 
-        virtual ProtocolTaskWidgetPtr   create(ProtocolTaskParamPtr pParam)
+        virtual WorkflowTaskWidgetPtr   create(WorkflowTaskParamPtr pParam)
         {
             return std::make_shared<CYoloV4Widget>(pParam);
         }
@@ -148,7 +148,7 @@ class YOLOV4SHARED_EXPORT CYoloV4Interface : public QObject, public CPluginProce
 
     public:
 
-        virtual std::shared_ptr<CProcessFactory> getProcessFactory()
+        virtual std::shared_ptr<CTaskFactory> getProcessFactory()
         {
             return std::make_shared<CYoloV4Factory>();
         }
