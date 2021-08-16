@@ -105,9 +105,11 @@ class YOLOV4SHARED_EXPORT CYoloV4Widget: public COcvWidgetDnnCore
         CYoloV4Widget(QWidget *parent = Q_NULLPTR);
         CYoloV4Widget(WorkflowTaskParamPtr pParam, QWidget *parent = Q_NULLPTR);
 
+        void onApply() override;
+
     private:
 
-        void init() override;
+        void init();
 
     private:
 

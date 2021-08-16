@@ -286,52 +286,53 @@ void CYoloV4Widget::init()
         assert(pParam);
         pParam->m_nmsThreshold = val;
     });
-    connect(m_pApplyBtn, &QPushButton::clicked, [&]
+}
+
+void CYoloV4Widget::onApply()
+{
+    auto pParam = std::dynamic_pointer_cast<CYoloV4Param>(m_pParam);
+    assert(pParam);
+    pParam->m_inputSize = m_pSpinInputSize->value();
+
+    if(pParam->m_datasetName == "COCO")
     {
-        auto pParam = std::dynamic_pointer_cast<CYoloV4Param>(m_pParam);
-        assert(pParam);
-        pParam->m_inputSize = m_pSpinInputSize->value();
+        pParam->m_labelsFile = pParam->m_modelFolder + "coco_names.txt";
+        m_pBrowseLabels->setPath(QString::fromStdString(pParam->m_labelsFile));
 
-        if(pParam->m_datasetName == "COCO")
+        if(pParam->m_modelName == "YOLOv4")
         {
-            pParam->m_labelsFile = pParam->m_modelFolder + "coco_names.txt";
-            m_pBrowseLabels->setPath(QString::fromStdString(pParam->m_labelsFile));
-
-            if(pParam->m_modelName == "YOLOv4")
-            {
-                pParam->m_structureFile = pParam->m_modelFolder + "yolov4.cfg";
-                pParam->m_modelFile = pParam->m_modelFolder + "yolov4.weights";
-                m_pBrowseConfig->setPath(QString::fromStdString(pParam->m_structureFile));
-                m_pBrowseWeights->setPath(QString::fromStdString(pParam->m_modelFile));
-            }
-            else if(pParam->m_modelName == "Tiny YOLOv4")
-            {
-                pParam->m_structureFile = pParam->m_modelFolder + "yolov4-tiny.cfg";
-                pParam->m_modelFile = pParam->m_modelFolder + "yolov4-tiny.weights";
-                m_pBrowseConfig->setPath(QString::fromStdString(pParam->m_structureFile));
-                m_pBrowseWeights->setPath(QString::fromStdString(pParam->m_modelFile));
-            }
-            else if(pParam->m_modelName == "YOLOv4-csp")
-            {
-                pParam->m_structureFile = pParam->m_modelFolder + "yolov4-csp.cfg";
-                pParam->m_modelFile = pParam->m_modelFolder + "yolov4-csp.weights";
-                m_pBrowseConfig->setPath(QString::fromStdString(pParam->m_structureFile));
-                m_pBrowseWeights->setPath(QString::fromStdString(pParam->m_modelFile));
-            }
-            else if(pParam->m_modelName == "YOLOv4x-mish")
-            {
-                pParam->m_structureFile = pParam->m_modelFolder + "yolov4x-mish.cfg";
-                pParam->m_modelFile = pParam->m_modelFolder + "yolov4x-mish.weights";
-                m_pBrowseConfig->setPath(QString::fromStdString(pParam->m_structureFile));
-                m_pBrowseWeights->setPath(QString::fromStdString(pParam->m_modelFile));
-            }
+            pParam->m_structureFile = pParam->m_modelFolder + "yolov4.cfg";
+            pParam->m_modelFile = pParam->m_modelFolder + "yolov4.weights";
+            m_pBrowseConfig->setPath(QString::fromStdString(pParam->m_structureFile));
+            m_pBrowseWeights->setPath(QString::fromStdString(pParam->m_modelFile));
         }
-        else
+        else if(pParam->m_modelName == "Tiny YOLOv4")
         {
-            pParam->m_structureFile = m_pBrowseConfig->getPath().toStdString();
-            pParam->m_modelFile = m_pBrowseWeights->getPath().toStdString();
-            pParam->m_labelsFile = m_pBrowseLabels->getPath().toStdString();
+            pParam->m_structureFile = pParam->m_modelFolder + "yolov4-tiny.cfg";
+            pParam->m_modelFile = pParam->m_modelFolder + "yolov4-tiny.weights";
+            m_pBrowseConfig->setPath(QString::fromStdString(pParam->m_structureFile));
+            m_pBrowseWeights->setPath(QString::fromStdString(pParam->m_modelFile));
         }
-        emit doApplyProcess(m_pParam);
-    });
+        else if(pParam->m_modelName == "YOLOv4-csp")
+        {
+            pParam->m_structureFile = pParam->m_modelFolder + "yolov4-csp.cfg";
+            pParam->m_modelFile = pParam->m_modelFolder + "yolov4-csp.weights";
+            m_pBrowseConfig->setPath(QString::fromStdString(pParam->m_structureFile));
+            m_pBrowseWeights->setPath(QString::fromStdString(pParam->m_modelFile));
+        }
+        else if(pParam->m_modelName == "YOLOv4x-mish")
+        {
+            pParam->m_structureFile = pParam->m_modelFolder + "yolov4x-mish.cfg";
+            pParam->m_modelFile = pParam->m_modelFolder + "yolov4x-mish.weights";
+            m_pBrowseConfig->setPath(QString::fromStdString(pParam->m_structureFile));
+            m_pBrowseWeights->setPath(QString::fromStdString(pParam->m_modelFile));
+        }
+    }
+    else
+    {
+        pParam->m_structureFile = m_pBrowseConfig->getPath().toStdString();
+        pParam->m_modelFile = m_pBrowseWeights->getPath().toStdString();
+        pParam->m_labelsFile = m_pBrowseLabels->getPath().toStdString();
+    }
+    emit doApplyProcess(m_pParam);
 }
