@@ -10,7 +10,7 @@ CYoloV4Param::CYoloV4Param() : COcvDnnProcessParam()
     m_inputSize = 416;
     m_modelName = "YOLOv4";
     m_datasetName = "COCO";
-    m_modelFolder = Utils::Plugin::getCppPath() + "/YoloV4/Model/";
+    m_modelFolder = Utils::Plugin::getCppPath() + "/infer_yolo_v4/Model/";
     m_labelsFile = m_modelFolder + "coco_names.txt";
     m_structureFile = m_modelFolder + "yolov4.cfg";
     m_modelFile = m_modelFolder + "yolov4.weights";
