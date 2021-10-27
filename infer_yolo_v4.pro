@@ -1,5 +1,5 @@
 QT += core gui widgets sql
-TARGET = YoloV4
+TARGET = infer_yolo_v4
 
 win32: DESTDIR = $$(USERPROFILE)/Ikomia/Plugins/C++/$$TARGET
 unix: DESTDIR = $$(HOME)/Ikomia/Plugins/C++/$$TARGET

@@ -57,7 +57,7 @@ class YOLOV4SHARED_EXPORT CYoloV4Factory : public CTaskFactory
 
         CYoloV4Factory()
         {
-            m_info.m_name = QObject::tr("YoloV4").toStdString();
+            m_info.m_name = "infer_yolo_v4";
             m_info.m_shortDescription = QObject::tr("Object detection using YOLO V4 neural network").toStdString();
             m_info.m_description = QObject::tr("There are a huge number of features which are said to improve Convolutional Neural Network (CNN) accuracy."
                                                "Practical testing of combinations of such features on large datasets, and theoretical justification  of  "
@@ -105,9 +105,11 @@ class YOLOV4SHARED_EXPORT CYoloV4Widget: public COcvWidgetDnnCore
         CYoloV4Widget(QWidget *parent = Q_NULLPTR);
         CYoloV4Widget(WorkflowTaskParamPtr pParam, QWidget *parent = Q_NULLPTR);
 
+        void onApply() override;
+
     private:
 
-        void init() override;
+        void init();
 
     private:
 
@@ -128,7 +130,7 @@ class YOLOV4SHARED_EXPORT CYoloV4WidgetFactory : public CWidgetFactory
 
         CYoloV4WidgetFactory()
         {
-            m_name = QObject::tr("YoloV4").toStdString();
+            m_name = "infer_yolo_v4";
         }
 
         virtual WorkflowTaskWidgetPtr   create(WorkflowTaskParamPtr pParam)
