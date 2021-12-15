@@ -56,7 +56,14 @@ size_t CYoloV4::getProgressSteps()
 int CYoloV4::getNetworkInputSize() const
 {
     auto pParam = std::dynamic_pointer_cast<CYoloV4Param>(m_pParam);
-    return pParam->m_inputSize;
+    int size = pParam->m_inputSize;
+
+    // Trick to overcome OpenCV issue around CUDA context and multithreading
+    // https://github.com/opencv/opencv/issues/20566
+    if(pParam->m_backend == cv::dnn::DNN_BACKEND_CUDA && m_bNewInput)
+        size = size + (m_sign * 32);
+
+    return size;
 }
 
 double CYoloV4::getNetworkInputScaleFactor() const
@@ -103,7 +110,6 @@ void CYoloV4::run()
 
             pParam->m_bUpdate = false;
         }
-
         int size = getNetworkInputSize();
         double scaleFactor = getNetworkInputScaleFactor();
         cv::Scalar mean = getNetworkInputMean();
@@ -126,6 +132,14 @@ void CYoloV4::run()
     emit m_signalHandler->doProgress();
     manageOutput(netOutputs);
     emit m_signalHandler->doProgress();
+
+    // Trick to overcome OpenCV issue around CUDA context and multithreading
+    // https://github.com/opencv/opencv/issues/20566
+    if(pParam->m_backend == cv::dnn::DNN_BACKEND_CUDA && m_bNewInput)
+    {
+        m_sign *= -1;
+        m_bNewInput = false;
+    }
 }
 
 void CYoloV4::manageOutput(const std::vector<cv::Mat>& dnnOutputs)
@@ -159,19 +173,18 @@ void CYoloV4::manageOutput(const std::vector<cv::Mat>& dnnOutputs)
         const auto nbBoxes = output.rows;
         for(int i=0; i<nbBoxes; ++i)
         {
-            float xCenter = output.at<float>(i, 0) * imgSrc.cols;
-            float yCenter = output.at<float>(i, 1) * imgSrc.rows;
-            float width = output.at<float>(i, 2) * imgSrc.cols;
-            float height = output.at<float>(i, 3) * imgSrc.rows;
-            float left = xCenter - width/2;
-            float top = yCenter - height/2;
-            cv::Rect2d r(left, top, width, height);
-
             for(size_t j=0; j<nbClasses; ++j)
             {
                 float confidence = output.at<float>(i, (int)j + probabilityIndex);
                 if (confidence > pParam->m_confidence)
                 {
+                    float xCenter = output.at<float>(i, 0) * imgSrc.cols;
+                    float yCenter = output.at<float>(i, 1) * imgSrc.rows;
+                    float width = output.at<float>(i, 2) * imgSrc.cols;
+                    float height = output.at<float>(i, 3) * imgSrc.rows;
+                    float left = xCenter - width/2;
+                    float top = yCenter - height/2;
+                    cv::Rect2d r(left, top, width, height);
                     boxes[j].push_back(r);
                     scores[j].push_back(confidence);
                 }
