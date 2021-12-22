@@ -46,6 +46,11 @@ class YOLOV4SHARED_EXPORT CYoloV4: public COcvDnnProcess
     private:
 
         void        manageOutput(const std::vector<cv::Mat> &dnnOutputs);
+        void        generateColors();
+
+    private:
+
+        std::vector<CColor> m_colors;
 };
 
 //--------------------------//
@@ -69,7 +74,7 @@ class YOLOV4SHARED_EXPORT CYoloV4Factory : public CTaskFactory
                                                "Mosaic data augmentation, CmBN, DropBlock regularization, and CIoU loss, and combine some of them to achieve "
                                                "state-of-the-art results: 43.5%AP (65.7% AP50) for the MS COCO dataset at a real-time speed of ∼65 FPS on Tesla V100.").toStdString();
             m_info.m_path = QObject::tr("Plugins/C++/Object/Detection").toStdString();
-            m_info.m_version = "1.0.0";
+            m_info.m_version = "1.1.0";
             m_info.m_iconPath = "Icon/icon.png";
             m_info.m_authors = "Alexey Bochkovskiy, Chien-Yao Wang, Hong-Yuan Mark Liao";
             m_info.m_article = "YOLOv4: Optimal Speed and Accuracy of Object Detection";
