@@ -73,7 +73,7 @@ class YOLOV4SHARED_EXPORT CYoloV4Factory : public CTaskFactory
                                                "Self-adversarial-training (SAT) and Mish-activation. We use new features: WRC, CSP, CmBN, SAT, Mish activation, "
                                                "Mosaic data augmentation, CmBN, DropBlock regularization, and CIoU loss, and combine some of them to achieve "
                                                "state-of-the-art results: 43.5%AP (65.7% AP50) for the MS COCO dataset at a real-time speed of ∼65 FPS on Tesla V100.").toStdString();
-            m_info.m_path = QObject::tr("Plugins/C++/Object/Detection").toStdString();
+            m_info.m_path = QObject::tr("Plugins/C++/Detection").toStdString();
             m_info.m_version = "1.1.0";
             m_info.m_iconPath = "Icon/icon.png";
             m_info.m_authors = "Alexey Bochkovskiy, Chien-Yao Wang, Hong-Yuan Mark Liao";
