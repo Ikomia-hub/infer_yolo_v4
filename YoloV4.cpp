@@ -34,16 +34,15 @@ UMapString CYoloV4Param::getParamMap() const
 //-------------------//
 //----- CYoloV4 -----//
 //-------------------//
-CYoloV4::CYoloV4() : COcvDnnProcess()
+CYoloV4::CYoloV4() : COcvDnnProcess(), CObjectDetectionTask()
 {
     m_pParam = std::make_shared<CYoloV4Param>();
-    addOutput(std::make_shared<CObjectDetectionIO>());
 }
 
-CYoloV4::CYoloV4(const std::string &name, const std::shared_ptr<CYoloV4Param> &pParam): COcvDnnProcess(name)
+CYoloV4::CYoloV4(const std::string &name, const std::shared_ptr<CYoloV4Param> &pParam)
+    : COcvDnnProcess(), CObjectDetectionTask(name)
 {
     m_pParam = std::make_shared<CYoloV4Param>(*pParam);
-    addOutput(std::make_shared<CObjectDetectionIO>());
 }
 
 size_t CYoloV4::getProgressSteps()
@@ -80,10 +79,13 @@ void CYoloV4::run()
     auto pInput = std::dynamic_pointer_cast<CImageIO>(getInput(0));
     auto pParam = std::dynamic_pointer_cast<CYoloV4Param>(m_pParam);
 
-    if(pInput == nullptr || pParam == nullptr)
+    if (pInput == nullptr)
+        throw CException(CoreExCode::INVALID_PARAMETER, "Invalid image input", __func__, __FILE__, __LINE__);
+
+    if (pParam == nullptr)
         throw CException(CoreExCode::INVALID_PARAMETER, "Invalid parameters", __func__, __FILE__, __LINE__);
 
-    if(pInput->isDataAvailable() == false)
+    if (pInput->isDataAvailable() == false)
         throw CException(CoreExCode::INVALID_PARAMETER, "Empty image", __func__, __FILE__, __LINE__);
 
     if (!Utils::File::isFileExist(pParam->m_modelFile))
@@ -110,19 +112,16 @@ void CYoloV4::run()
     {
         if(m_net.empty() || pParam->m_bUpdate)
         {
-            m_net = readDnn();
+            m_net = readDnn(pParam);
             if(m_net.empty())
                 throw CException(CoreExCode::INVALID_PARAMETER, "Failed to load network", __func__, __FILE__, __LINE__);
 
-            if(m_classNames.empty())
-                readClassNames();
-
-            generateColors();
+            readClassNames(pParam->m_labelsFile);
             pParam->m_bUpdate = false;
         }
-        forward(imgSrc, netOutputs);
+        forward(imgSrc, netOutputs, pParam);
     }
-    catch(cv::Exception& e)
+    catch(std::exception& e)
     {
         throw CException(CoreExCode::INVALID_PARAMETER, e.what(), __func__, __FILE__, __LINE__);
     }
@@ -135,8 +134,6 @@ void CYoloV4::run()
 
 void CYoloV4::manageOutput(const std::vector<cv::Mat>& dnnOutputs)
 {
-    forwardInputImage();
-
     auto pParam = std::dynamic_pointer_cast<CYoloV4Param>(m_pParam);
     auto pInput = std::dynamic_pointer_cast<CImageIO>(getInput(0));
     CMat imgSrc = pInput->getImage();
@@ -149,10 +146,7 @@ void CYoloV4::manageOutput(const std::vector<cv::Mat>& dnnOutputs)
     scores.resize(nbClasses);
     indices.resize(nbClasses);
 
-    auto objDetectIOPtr = std::dynamic_pointer_cast<CObjectDetectionIO>(getOutput(1));
-    objDetectIOPtr->init(getName(), 0);
     const int probabilityIndex = 5;
-
     for(auto&& output : dnnOutputs)
     {
         const auto nbBoxes = output.rows;
@@ -189,20 +183,8 @@ void CYoloV4::manageOutput(const std::vector<cv::Mat>& dnnOutputs)
             const int index = indices[i][j];
             cv::Rect2d box = boxes[i][index];
             float confidence = scores[i][index];
-            objDetectIOPtr->addObject(id++, m_classNames[i], confidence, box.x, box.y, box.width, box.height, m_colors[i]);
+            addObject(id++, i, confidence, box.x, box.y, box.width, box.height);
         }
-    }
-}
-
-void CYoloV4::generateColors()
-{
-    //Random colors
-    for(size_t i=0; i<m_classNames.size(); ++i)
-    {
-        m_colors.push_back({ (uchar)((double)std::rand() / (double)RAND_MAX * 255.0),
-                             (uchar)((double)std::rand() / (double)RAND_MAX * 255.0),
-                             (uchar)((double)std::rand() / (double)RAND_MAX * 255.0),
-                           });
     }
 }
 
